@@ -367,6 +367,77 @@ body {
   color: var(--crimson);
 }
 
+.ca-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 20px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--crimson-dim);
+  background: rgba(232, 74, 95, 0.06);
+}
+
+.ca-label {
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  color: var(--gold);
+}
+
+.ca-address {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--ink);
+  word-break: break-all;
+  flex: 1 1 200px;
+  min-width: 0;
+}
+
+.ca-address--rail {
+  display: block;
+  font-size: 10px;
+  line-height: 1.45;
+  margin-bottom: 8px;
+}
+
+.rail-ca {
+  margin-bottom: 4px;
+}
+
+.ca-copy,
+.ca-link {
+  font-family: var(--sans);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ink-soft);
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.ca-copy:hover,
+.ca-link:hover {
+  background: var(--violet-dim);
+  border-color: var(--violet);
+  color: var(--ink);
+}
+
+.ca-copy.copied {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.ca-copy--rail {
+  width: 100%;
+}
+
 /* ── Sections ───────────────────────────────── */
 
 .section {

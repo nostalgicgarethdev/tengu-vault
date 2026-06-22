@@ -504,7 +504,39 @@ function initTocObserver() {
   sections.forEach((s) => observer.observe(s));
 }
 
+const CA = "N6qvhBxTMX3dm41NV96Wx7ahwp1BQWEJgKMcPxypump";
+
+function initCaCopy() {
+  const flash = (btn) => {
+    const prev = btn.textContent;
+    btn.textContent = "Copied!";
+    btn.classList.add("copied");
+    setTimeout(() => {
+      btn.textContent = prev;
+      btn.classList.remove("copied");
+    }, 1600);
+  };
+
+  document.querySelectorAll("#ca-copy, [data-copy-ca]").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      try {
+        await navigator.clipboard.writeText(CA);
+        flash(btn);
+      } catch {
+        const el = document.createElement("textarea");
+        el.value = CA;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand("copy");
+        el.remove();
+        flash(btn);
+      }
+    });
+  });
+}
+
 document.getElementById("content").innerHTML = VAULT.map(renderSection).join("");
 renderToc();
 renderLinkFacts();
 initTocObserver();
+initCaCopy();
