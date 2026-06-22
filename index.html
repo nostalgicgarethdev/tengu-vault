@@ -3,130 +3,51 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TENGU_VAULT // /internal</title>
+  <title>Tengu — Claude Code's Internal Codename</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Outfit:wght@400;500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <canvas id="matrix-canvas" aria-hidden="true"></canvas>
   <div class="bloom-layer" aria-hidden="true"></div>
-  <div class="hex-field" id="hex-field" aria-hidden="true"></div>
-  <div class="scan-sweep" aria-hidden="true"></div>
-  <div class="chromatic" aria-hidden="true"></div>
-  <div class="noise"></div>
-  <div class="scanlines"></div>
+  <div class="mist" aria-hidden="true"></div>
   <div class="vignette"></div>
-  <div class="cursor-dot" id="cursor-dot" aria-hidden="true"></div>
-  <div class="cursor-ring" id="cursor-ring" aria-hidden="true"></div>
 
-  <div class="shell" id="shell">
-    <header class="topbar">
-      <div class="brand">
-        <pre class="logo glitch-target" aria-hidden="true">
-████████╗███████╗███╗   ██╗ ██████╗ ██╗   ██╗
-╚══██╔══╝██╔════╝████╗  ██║██╔════╝ ██║   ██║
-   ██║   █████╗  ██╔██╗ ██║██║  ███╗██║   ██║
-   ██║   ██╔══╝  ██║╚██╗██║██║   ██║██║   ██║
-   ██║   ███████╗██║ ╚████║╚██████╔╝╚██████╔╝
-   ╚═╝   ╚══════╝╚═╝  ╚═══╝ ╚═════╝  ╚═════╝
-        </pre>
-        <div class="brand-meta">
-          <span class="tagline">internal codename archive · claude code · not a model</span>
-          <span class="tag">CLASS: YŌKAI</span>
-          <span class="tag warn">PRODUCT: TENGU</span>
-          <span class="tag danger">PREFIX: tengu_*</span>
-        </div>
-      </div>
-      <div class="rec-panel">
-        <span class="rec-dot"></span>
-        <span>EXFILTRATED</span>
-        <span class="session" id="session-id">SES-000000</span>
-        <span class="clock" id="clock">00:00:00</span>
+  <div class="page" id="page">
+    <header class="hero">
+      <div class="torii" aria-hidden="true"><span></span><span></span></div>
+      <p class="hero-kicker">天狗 · internal codename archive</p>
+      <h1 class="hero-title">Tengu</h1>
+      <p class="hero-lead">
+        Anthropic's secret name for <strong>Claude Code</strong> — the AI coding agent.
+        Not a model. A mountain spirit name for the tool itself.
+      </p>
+      <div class="hero-chips">
+        <span class="chip">Claude Code</span>
+        <span class="chip accent">tengu_*</span>
+        <span class="chip">yōkai lore</span>
+        <button id="sound-btn" class="chip btn" type="button">Wind off</button>
       </div>
     </header>
 
-    <main class="grid">
-      <aside class="panel left">
-        <h2>// FILE_TREE</h2>
-        <div class="cwd" id="cwd">/internal</div>
-        <nav class="file-tree" id="file-tree"></nav>
-
-        <h2>// CODENAME_REGISTRY</h2>
-        <ul class="entity-list" id="entity-list"></ul>
+    <div class="layout">
+      <nav class="toc" id="toc" aria-label="Sections"></nav>
+      <main class="content" id="content"></main>
+      <aside class="rail" id="rail">
+        <div class="rail-card sticky">
+          <h2>TL;DR</h2>
+          <p><strong>Tengu</strong> = Claude Code. Every feature flag and telemetry event in the CLI is prefixed <code>tengu_</code>.</p>
+          <h2>Codenames</h2>
+          <div id="codename-cards"></div>
+        </div>
       </aside>
-
-      <section class="panel center">
-        <div class="term-header">
-          <span id="cmd-line">root@tengu-vault:/internal$ _</span>
-          <div class="term-controls">
-            <button id="speed-btn" class="ctrl">[1x]</button>
-            <button id="sound-btn" class="ctrl">[WIND:OFF]</button>
-          </div>
-        </div>
-        <div class="terminal" id="terminal" aria-live="polite"></div>
-        <div class="input-line">
-          <span class="prompt">yamabushi@kurama$</span>
-          <span class="cursor-blink">_</span>
-          <span class="hint" id="file-hint">logs auto-play · click folders to jump</span>
-        </div>
-      </section>
-
-      <aside class="panel right">
-        <h2>// OPEN_FILE</h2>
-        <div class="open-file" id="open-file">
-          <span class="file-path">—</span>
-          <span class="file-meta">—</span>
-        </div>
-
-        <h2>// CODENAME_TABLE</h2>
-        <table class="truth-table">
-          <thead>
-            <tr><th>PUBLIC</th><th>INTERNAL</th><th>TYPE</th></tr>
-          </thead>
-          <tbody id="truth-body"></tbody>
-        </table>
-
-        <h2>// LIVE_METRICS</h2>
-        <div class="metrics">
-          <div class="metric"><label>LORE_DEPTH</label><div class="bar"><span id="bar-lore"></span></div><span id="val-lore">0%</span></div>
-          <div class="metric"><label>FLAGS_PARSED</label><div class="bar"><span id="bar-flags"></span></div><span id="val-flags">0</span></div>
-          <div class="metric"><label>ASCII_RENDERS</label><div class="bar"><span id="bar-ascii"></span></div><span id="val-ascii">0</span></div>
-          <div class="metric"><label>SCENE</label><div class="bar"><span id="bar-section"></span></div><span id="val-section">BRIEFING</span></div>
-        </div>
-
-        <h2>// TL;DR</h2>
-        <p class="guide">
-          <strong>Tengu</strong> is Anthropic's internal codename for
-          <strong>Claude Code</strong> — the terminal AI coding agent.
-          Not a model. The product itself.
-        </p>
-
-        <h2>// WHY IT FITS</h2>
-        <p class="guide">
-          Mountain yōkai who teach martial arts, wear ascetic robes,
-          and carry a feather fan that stirs great winds — a spirit
-          that guides humans through dangerous terrain. Sound familiar?
-        </p>
-
-        <h2>// SCENE ORDER</h2>
-        <ol class="scene-list">
-          <li><span class="act">0</span> Briefing — start here</li>
-          <li><span class="act">I</span> Claude Code = Tengu</li>
-          <li><span class="act">II</span> Animal codename pattern</li>
-          <li><span class="act">III</span> Folklore deep dive</li>
-          <li><span class="act">IV</span> tengu_* internals</li>
-          <li><span class="act">V</span> Undercover mode</li>
-          <li><span class="act">VI</span> Why they picked it</li>
-          <li><span class="act">VII</span> Shrine gallery</li>
-        </ol>
-      </aside>
-    </main>
+    </div>
 
     <footer class="footer">
-      <span>TENGU_VAULT v1.0.0 // folklore × leaked internals · educational fan archive</span>
-      <span id="checksum">SHA256: --------</span>
+      <p>TENGU_VAULT · fan-made educational archive · not affiliated with Anthropic</p>
+      <p class="footer-note">Folklore + publicly reported leak analysis · March 2026 sourcemap incident</p>
     </footer>
   </div>
 

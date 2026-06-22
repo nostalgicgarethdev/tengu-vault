@@ -57,8 +57,8 @@ const VAULT = [
 ════════════════════════════════════════
 
 WHAT YOU'RE READING
-  A fan-made terminal explainer. Not official Anthropic.
-  Built in the style of recovered internal docs.
+  A fan-made scroll explainer. Not official Anthropic.
+  Folklore meets leaked engineering nomenclature.
 
 THE HEADLINE
   Tengu = Claude Code. The terminal AI coding tool.
@@ -94,7 +94,7 @@ DISCLAIMER
       {
         name: "acts.txt",
         title: "Scene map",
-        about: "Seven folders · auto-play order",
+        about: "All seven sections on one page",
         kind: "text",
         entries: [
           {
@@ -626,342 +626,165 @@ MYSTERIOUS VIBE
   },
 ];
 
-const terminal = document.getElementById("terminal");
-const fileTree = document.getElementById("file-tree");
-const entityList = document.getElementById("entity-list");
-const truthBody = document.getElementById("truth-body");
-const speedBtn = document.getElementById("speed-btn");
-const cmdLine = document.getElementById("cmd-line");
-const cwdEl = document.getElementById("cwd");
-const openFileEl = document.getElementById("open-file");
-
-let speed = 1;
-let folderIdx = 0;
-let fileIdx = 0;
-let entryIdx = 0;
-let flagCount = 0;
-let asciiCount = 0;
-let typingTimer = null;
-
-function pad(n) {
-  return String(n).padStart(2, "0");
+function esc(s) {
+  return s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
-function timestamp() {
-  const d = new Date();
-  return `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-}
+function formatProse(text) {
+  const blocks = text.split(/\n\n+/);
+  let html = '<div class="prose">';
 
-function randomHex(len) {
-  const chars = "0123456789abcdef";
-  let out = "";
-  for (let i = 0; i < len; i++) out += chars[Math.floor(Math.random() * 16)];
-  return out;
-}
+  for (const block of blocks) {
+    const lines = block.split("\n");
+    let i = 0;
 
-function initSidebar() {
-  Object.entries(CODENAMES).forEach(([key, e]) => {
-    const li = document.createElement("li");
-    li.className = `entity ${key}`;
-    li.innerHTML = `
-      <span class="alias" style="color:${e.color}">${e.internal}</span>
-      <span class="claim">${e.public}</span>
-      <span class="true-id">${e.type} · ${e.note}</span>
-    `;
-    entityList.appendChild(li);
-
-    const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${e.public}</td><td>${e.internal}</td><td>${e.type}</td>`;
-    truthBody.appendChild(tr);
-  });
-}
-
-function buildFileTree() {
-  fileTree.innerHTML = "";
-
-  VAULT.forEach((folder, fi) => {
-    const block = document.createElement("div");
-    block.className = "tree-folder";
-    block.innerHTML = `
-      <div class="tree-folder-name" data-folder="${fi}">
-        📁 ${folder.id}
-        <span class="folder-label">${folder.act ? `${folder.act} · ` : ""}${folder.title}</span>
-      </div>
-      <div class="folder-about">${folder.about}</div>`;
-
-    const files = document.createElement("div");
-    files.className = "tree-files";
-    folder.files.forEach((file, fii) => {
-      const el = document.createElement("span");
-      el.className = "tree-file";
-      el.dataset.folder = fi;
-      el.dataset.file = fii;
-      el.innerHTML = `${file.name} <span class="file-label">— ${file.title}</span>`;
-      files.appendChild(el);
-      files.appendChild(document.createElement("br"));
-    });
-    block.appendChild(files);
-    fileTree.appendChild(block);
-  });
-
-  fileTree.querySelectorAll(".tree-folder-name").forEach((el) => {
-    el.addEventListener("click", () => openFolder(Number(el.dataset.folder)));
-  });
-  fileTree.querySelectorAll(".tree-file").forEach((el) => {
-    el.addEventListener("click", () => openFile(Number(el.dataset.folder), Number(el.dataset.file)));
-  });
-}
-
-function setActiveTree(folderI, fileI) {
-  fileTree.querySelectorAll(".tree-folder-name, .tree-file").forEach((n) => n.classList.remove("active"));
-  const folderEl = fileTree.querySelector(`.tree-folder-name[data-folder="${folderI}"]`);
-  if (folderEl) folderEl.classList.add("active");
-  if (fileI !== undefined) {
-    const fileEl = fileTree.querySelector(`.tree-file[data-folder="${folderI}"][data-file="${fileI}"]`);
-    if (fileEl) fileEl.classList.add("active");
-  }
-}
-
-function updateUI() {
-  const folder = VAULT[folderIdx];
-  const file = folder?.files[fileIdx];
-  const sceneTotal = VAULT.filter((f) => f.scene > 0).length;
-  const sceneProgress = folder?.scene > 0 ? folder.scene : 0;
-  const lorePct = Math.min(100, 20 + folderIdx * 12);
-
-  document.getElementById("bar-lore").style.width = `${lorePct}%`;
-  document.getElementById("val-lore").textContent = `${lorePct}%`;
-  document.getElementById("bar-flags").style.width = `${Math.min(100, flagCount * 8)}%`;
-  document.getElementById("val-flags").textContent = String(flagCount);
-  document.getElementById("bar-ascii").style.width = `${Math.min(100, asciiCount * 25)}%`;
-  document.getElementById("val-ascii").textContent = String(asciiCount);
-  document.getElementById("bar-section").style.width = `${(sceneProgress / sceneTotal) * 100}%`;
-  document.getElementById("val-section").textContent = folder?.act || "—";
-  document.getElementById("checksum").textContent = `SHA256: ${randomHex(8)}…${randomHex(4)}`;
-
-  if (folder && file) {
-    cwdEl.textContent = folder.path;
-    cmdLine.textContent = `cat ${folder.path}/${file.name}`;
-    openFileEl.innerHTML = `
-      <span class="file-path">${folder.act ? `${folder.act} · ` : ""}${folder.title} → ${file.title}</span>
-      <span class="file-meta">${folder.about}</span>
-      <span class="file-meta">${file.about}</span>
-    `;
-    setActiveTree(folderIdx, fileIdx);
-  }
-}
-
-function appendLine(html, className = "line") {
-  const div = document.createElement("div");
-  div.className = className;
-  div.innerHTML = html;
-  terminal.appendChild(div);
-  terminal.scrollTop = terminal.scrollHeight;
-  return div;
-}
-
-function createEntryLine(entry) {
-  const div = document.createElement("div");
-  div.className = "line";
-
-  if (entry.type === "system") {
-    div.classList.add("system");
-    div.innerHTML = `<span class="ts">[${timestamp()}]</span><span class="text">// ${entry.text}</span>`;
-    return { el: div, mode: "instant" };
-  }
-
-  if (entry.type === "prose") {
-    div.classList.add("prose");
-    div.innerHTML = `<span class="text"></span>`;
-    return { el: div, mode: "type", text: entry.text };
-  }
-
-  if (entry.type === "code") {
-    div.classList.add("code-block");
-    flagCount += (entry.text.match(/tengu_/g) || []).length || 3;
-    updateUI();
-    div.innerHTML = `
-      <span class="code-label">${entry.label || "dump.txt"}</span>
-      <pre class="code-art"></pre>`;
-    return { el: div, mode: "code", text: entry.text };
-  }
-
-  if (entry.type === "ascii") {
-    div.classList.add("ascii");
-    div.innerHTML = `
-      <div class="ascii-wrap drawing" data-label="${entry.label || "shrine.ascii"}">
-        <pre class="ascii-art"></pre>
-      </div>`;
-    return { el: div, mode: "ascii", art: entry.art };
-  }
-
-  return { el: div, mode: "instant" };
-}
-
-function typeText(el, text, idx, done) {
-  const span = el.querySelector(".text");
-  if (!span || idx >= text.length) {
-    done();
-    return;
-  }
-  span.textContent += text[idx];
-  const ch = text[idx];
-  let delay = 22;
-  if (ch === "\n") delay = 36;
-  else if (ch === "·" || ch === "—") delay = 120;
-  else if (ch === " ") delay = 12;
-  typingTimer = setTimeout(() => typeText(el, text, idx + 1, done), (delay + Math.random() * 10) / speed);
-}
-
-function typeCode(el, text, idx, done) {
-  const pre = el.querySelector(".code-art");
-  if (!pre || idx >= text.length) {
-    pre?.classList.add("done");
-    done();
-    return;
-  }
-  pre.textContent += text[idx];
-  const ch = text[idx];
-  let delay = 6;
-  if (ch === "\n") delay = 28;
-  typingTimer = setTimeout(() => typeCode(el, text, idx + 1, done), (delay + Math.random() * 6) / speed);
-}
-
-function typeAscii(el, art, lineIdx, charIdx, done) {
-  const pre = el.querySelector(".ascii-art");
-  const wrap = el.querySelector(".ascii-wrap");
-  const lines = art.split("\n");
-
-  if (lineIdx >= lines.length) {
-    wrap.classList.remove("drawing");
-    pre.classList.add("done");
-    asciiCount++;
-    updateUI();
-    done();
-    return;
-  }
-
-  const line = lines[lineIdx];
-  if (charIdx < line.length) {
-    const current = pre.textContent.split("\n");
-    current[lineIdx] = (current[lineIdx] ?? "") + line[charIdx];
-    pre.textContent = current.join("\n");
-    typingTimer = setTimeout(() => typeAscii(el, art, lineIdx, charIdx + 1, done), (8 + Math.random() * 10) / speed);
-    return;
-  }
-
-  pre.textContent = lines.slice(0, lineIdx + 1).join("\n");
-  typingTimer = setTimeout(() => typeAscii(el, art, lineIdx + 1, 0, done), (70 + Math.random() * 50) / speed);
-}
-
-function showFileHeader(folder, file) {
-  const act = folder.act ? `<span style="color:var(--term-amber)">${folder.act}</span> · ` : "";
-  appendLine(`<span class="text">${act}<strong>${folder.title}</strong> — ${file.title}</span>`, "line file-header");
-  appendLine(`<span class="text" style="opacity:.6">${folder.about}</span>`, "line file-header");
-  appendLine(`<span class="text" style="opacity:.45;font-size:10px">${file.about}</span>`, "line file-header");
-}
-
-function playEntry(done) {
-  const folder = VAULT[folderIdx];
-  const file = folder.files[fileIdx];
-  const entry = file.entries[entryIdx];
-
-  if (!entry) {
-    entryIdx = 0;
-    fileIdx++;
-    if (fileIdx >= folder.files.length) {
-      fileIdx = 0;
-      folderIdx++;
-      if (folderIdx >= VAULT.length) {
-        folderIdx = 1;
-        flagCount = 0;
-        asciiCount = 0;
-        appendLine(`<span class="text">// looping back to ACT I...</span>`, "line system");
-        typingTimer = setTimeout(() => openFolder(1), 1400 / speed);
-        return;
-      }
-      openFolder(folderIdx);
-      return;
+    if (lines[i + 1] && /^[─═\-]+$/.test(lines[i + 1].trim())) {
+      html += `<h3>${esc(lines[i])}</h3>`;
+      i += 2;
     }
-    openFile(folderIdx, fileIdx);
-    return;
+
+    while (i < lines.length) {
+      const line = lines[i];
+      if (!line.trim()) {
+        i++;
+        continue;
+      }
+
+      if (/^  /.test(line)) {
+        html += "<ul>";
+        while (i < lines.length && /^  /.test(lines[i])) {
+          const item = lines[i].trim().replace(/^·\s*/, "");
+          html += `<li>${esc(item)}</li>`;
+          i++;
+        }
+        html += "</ul>";
+        continue;
+      }
+
+      if (
+        /^[A-Z0-9][A-Z0-9\s()'\/—·:?]+$/.test(line.trim()) &&
+        line.length < 72 &&
+        i + 1 < lines.length &&
+        /^  /.test(lines[i + 1])
+      ) {
+        html += `<h3>${esc(line)}</h3><ul>`;
+        i++;
+        while (i < lines.length && /^  /.test(lines[i])) {
+          html += `<li>${esc(lines[i].trim())}</li>`;
+          i++;
+        }
+        html += "</ul>";
+        continue;
+      }
+
+      html += `<p>${esc(line)}</p>`;
+      i++;
+    }
   }
 
-  updateUI();
-  const { el, mode, text, art } = createEntryLine(entry);
-  terminal.appendChild(el);
-  terminal.scrollTop = terminal.scrollHeight;
-
-  if (window.TenguFX) {
-    if (entry.type === "code") window.TenguFX.pulse(0.55);
-    else if (entry.type === "ascii") window.TenguFX.pulse(0.65);
-    else if (entry.type === "system") window.TenguFX.pulse(0.2);
-    else window.TenguFX.pulse(0.12);
-  }
-
-  const gap = entry.type === "code" ? 350 : entry.type === "ascii" ? 500 : 400;
-
-  const next = () => {
-    entryIdx++;
-    typingTimer = setTimeout(() => playEntry(done), (gap + Math.random() * 200) / speed);
-  };
-
-  if (mode === "instant") {
-    setTimeout(next, (350 + Math.random() * 150) / speed);
-    return;
-  }
-  if (mode === "ascii") {
-    typeAscii(el, art, 0, 0, () => setTimeout(next, (500 + Math.random() * 200) / speed));
-    return;
-  }
-  if (mode === "code") {
-    typeCode(el, text, 0, () => setTimeout(next, (400 + Math.random() * 200) / speed));
-    return;
-  }
-  typeText(el, text, 0, next);
+  html += "</div>";
+  return html;
 }
 
-function openFolder(fi) {
-  folderIdx = fi;
-  fileIdx = 0;
-  entryIdx = 0;
-  terminal.innerHTML = "";
-  const folder = VAULT[folderIdx];
-  appendLine(`<span class="text">$ cd ${folder.path}</span>`, "line cmd");
-  const act = folder.act ? `<span style="color:var(--term-amber)">${folder.act}</span> · ` : "";
-  appendLine(`<span class="text">${act}<strong>${folder.title}</strong></span>`, "line system");
-  appendLine(`<span class="text" style="opacity:.65">${folder.about}</span>`, "line system");
-  folder.files.forEach((f) => {
-    appendLine(`<span class="text">  📄 ${f.name} — ${f.title}</span>`, "line system");
-  });
-  updateUI();
-  typingTimer = setTimeout(() => openFile(folderIdx, 0), 800 / speed);
+function renderEntry(entry) {
+  if (entry.type === "system") {
+    if (entry.text.startsWith("REWIND")) return "";
+    return `<div class="callout">${esc(entry.text)}</div>`;
+  }
+  if (entry.type === "prose") return formatProse(entry.text);
+  if (entry.type === "code") {
+    return `<div class="code-panel">
+      <span class="code-label">${esc(entry.label || "dump.txt")}</span>
+      <pre>${esc(entry.text)}</pre>
+    </div>`;
+  }
+  if (entry.type === "ascii") {
+    return `<figure class="figure">
+      <pre>${esc(entry.art)}</pre>
+      <figcaption>${esc(entry.label || "shrine.ascii")}</figcaption>
+    </figure>`;
+  }
+  return "";
 }
 
-function openFile(fi, fii) {
-  folderIdx = fi;
-  fileIdx = fii;
-  entryIdx = 0;
-  terminal.innerHTML = "";
-  const folder = VAULT[folderIdx];
-  const file = folder.files[fileIdx];
-  showFileHeader(folder, file);
-  updateUI();
-  playEntry(() => {});
+function renderArticle(file, folder) {
+  const asciiEntries = file.entries.filter((e) => e.type === "ascii");
+  const otherEntries = file.entries.filter((e) => e.type !== "ascii");
+  const isGallery = folder.id === "07_gallery" && asciiEntries.length > 1;
+
+  let body = otherEntries.map((e) => renderEntry(e)).join("");
+
+  if (asciiEntries.length) {
+    if (isGallery) {
+      body += `<div class="gallery-grid">${asciiEntries.map((e) => renderEntry(e)).join("")}</div>`;
+    } else {
+      body += asciiEntries.map((e) => renderEntry(e)).join("");
+    }
+  }
+
+  return `<article class="article" id="${folder.id}-${file.name.replace(/\./g, "-")}">
+    <h3 class="article-title">${esc(file.title)}</h3>
+    <p class="article-about">${esc(file.about)}</p>
+    ${body}
+  </article>`;
 }
 
-speedBtn.addEventListener("click", () => {
-  const speeds = [1, 2, 4];
-  speed = speeds[(speeds.indexOf(speed) + 1) % speeds.length];
-  speedBtn.textContent = `[${speed}x]`;
-});
+function renderSection(folder) {
+  return `<section class="section" id="${folder.id}">
+    <header class="section-header">
+      <p class="section-act">${esc(folder.act || "")}</p>
+      <h2 class="section-title">${esc(folder.title)}</h2>
+      <p class="section-about">${esc(folder.about)}</p>
+    </header>
+    ${folder.files.map((f) => renderArticle(f, folder)).join("")}
+  </section>`;
+}
 
-document.getElementById("session-id").textContent = `SES-${randomHex(6).toUpperCase()}`;
-initSidebar();
-buildFileTree();
-updateUI();
-setInterval(() => {
-  document.getElementById("clock").textContent = timestamp();
-}, 1000);
+function renderToc() {
+  const toc = document.getElementById("toc");
+  toc.innerHTML = `<h2>Sections</h2>${VAULT.map(
+    (f) =>
+      `<a href="#${f.id}"><span class="toc-act">${esc(f.act || "")}</span>${esc(f.title)}</a>`
+  ).join("")}`;
+}
 
-openFolder(0);
+function renderCodenames() {
+  document.getElementById("codename-cards").innerHTML = Object.values(CODENAMES)
+    .map(
+      (e) => `<div class="codename-card">
+        <div class="name" style="color:${e.color}">${esc(e.internal)}</div>
+        <div class="public">${esc(e.public)}</div>
+        <div class="note">${esc(e.type)} · ${esc(e.note)}</div>
+      </div>`
+    )
+    .join("");
+}
+
+function initTocObserver() {
+  const links = [...document.querySelectorAll(".toc a")];
+  const sections = links.map((a) => document.querySelector(a.getAttribute("href"))).filter(Boolean);
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          links.forEach((l) =>
+            l.classList.toggle("active", l.getAttribute("href") === `#${entry.target.id}`)
+          );
+        }
+      });
+    },
+    { rootMargin: "-15% 0px -60% 0px", threshold: 0 }
+  );
+
+  sections.forEach((s) => observer.observe(s));
+}
+
+document.getElementById("content").innerHTML = VAULT.map(renderSection).join("");
+renderToc();
+renderCodenames();
+initTocObserver();
