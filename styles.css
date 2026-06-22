@@ -84,8 +84,61 @@ body {
 
 .hero {
   position: relative;
+  padding: 56px 0 48px;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1fr minmax(260px, 340px);
+  gap: 40px;
+  align-items: center;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.hero-copy {
+  text-align: left;
+}
+
+.hero-figure {
+  margin: 0;
+}
+
+.hero-frame {
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid rgba(212, 168, 83, 0.35);
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.5),
+    0 0 40px rgba(232, 74, 95, 0.12);
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.hero-frame img {
+  display: block;
+  width: 100%;
+  height: auto;
+  vertical-align: middle;
+}
+
+.hero-figure figcaption {
+  margin-top: 12px;
+  font-family: var(--sans);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-soft);
   text-align: center;
-  padding: 72px 0 56px;
+}
+
+.hero-figure figcaption strong {
+  color: var(--gold);
+}
+
+.caption-sub {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  opacity: 0.75;
 }
 
 .torii {
@@ -93,7 +146,7 @@ body {
   display: flex;
   justify-content: center;
   gap: 120px;
-  margin-bottom: 28px;
+  margin-bottom: 32px;
   opacity: 0.7;
 }
 
@@ -154,7 +207,7 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  justify-content: center;
+  justify-content: flex-start;
 }
 
 .chip {
@@ -486,6 +539,31 @@ body {
   letter-spacing: 0.04em;
 }
 
+.article-figure {
+  margin: 24px 0;
+  text-align: center;
+}
+
+.article-figure img {
+  max-width: 100%;
+  width: min(360px, 100%);
+  height: auto;
+  border-radius: 10px;
+  border: 1px solid rgba(212, 168, 83, 0.3);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+}
+
+.article-figure figcaption {
+  font-family: var(--sans);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  margin-top: 12px;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 .gallery-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -554,6 +632,26 @@ body {
   }
 }
 
+@media (max-width: 900px) {
+  .hero-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .hero-copy {
+    text-align: center;
+  }
+
+  .hero-chips {
+    justify-content: center;
+  }
+
+  .hero-figure {
+    max-width: 320px;
+    margin: 0 auto;
+  }
+}
+
 @media (max-width: 600px) {
   .page {
     padding: 0 16px 48px;
@@ -564,6 +662,6 @@ body {
   }
 
   .hero {
-    padding: 48px 0 36px;
+    padding: 40px 0 32px;
   }
 }

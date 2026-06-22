@@ -312,17 +312,10 @@ slightly uncanny guide you invite into your environment —
 not the deity itself, but the spirit that knows the path.`,
           },
           {
-            type: "ascii",
-            label: "claude_code_as_tengu.ascii",
-            art: `  $ claude
-
-      ╭──────────────────────────╮
-      │ 天狗 · TENGU              │
-      │ public: Claude Code       │
-      │ cwd: your_repo/           │
-      │ flags: tengu_*            │
-      │ model: [your pick]        │
-      ╰──────────────────────────╯`,
+            type: "image",
+            src: "images/sojobo-tengu.jpg",
+            alt: "Daitengu woodblock print — the folkloric archetype behind Claude Code's codename",
+            caption: "Daitengu (大天狗) — the long-nosed mountain lord. Claude Code's internal name points at this teacher-guide archetype, not the AI models themselves.",
           },
         ],
       },
@@ -444,6 +437,12 @@ function renderEntry(entry) {
     return `<figure class="figure">
       <pre>${esc(entry.art)}</pre>
       <figcaption>${esc(entry.label || "diagram.ascii")}</figcaption>
+    </figure>`;
+  }
+  if (entry.type === "image") {
+    return `<figure class="article-figure">
+      <img src="${esc(entry.src)}" alt="${esc(entry.alt || "")}" loading="lazy" />
+      ${entry.caption ? `<figcaption>${esc(entry.caption)}</figcaption>` : ""}
     </figure>`;
   }
   return "";
