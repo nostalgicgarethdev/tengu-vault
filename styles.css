@@ -271,31 +271,47 @@ body {
   color: var(--crimson);
 }
 
-.codename-card {
-  padding: 12px 0;
+.link-fact {
+  padding: 10px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.codename-card:last-child {
+.link-fact:last-child {
   border-bottom: none;
 }
 
-.codename-card .name {
+.link-label {
+  display: block;
   font-family: var(--sans);
-  font-weight: 600;
-  font-size: 14px;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 4px;
 }
 
-.codename-card .public {
+.link-value {
+  font-family: var(--sans);
   font-size: 13px;
-  color: var(--ink-soft);
+  font-weight: 500;
+  line-height: 1.4;
+  word-break: break-word;
 }
 
-.codename-card .note {
-  font-size: 11px;
+.rail-note {
+  font-size: 14px;
   color: var(--ink-soft);
-  opacity: 0.75;
-  margin-top: 4px;
+  line-height: 1.5;
+}
+
+.rail-note strong {
+  color: var(--crimson);
+}
+
+.hero-lead code {
+  font-family: var(--mono);
+  font-size: 0.9em;
+  color: var(--crimson);
 }
 
 /* ── Sections ───────────────────────────────── */

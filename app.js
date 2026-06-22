@@ -1,510 +1,267 @@
-const CODENAMES = {
-  tengu: {
-    public: "Claude Code",
-    internal: "Tengu",
-    type: "product",
-    color: "#ff4466",
-    note: "terminal coding agent · npm @anthropic-ai/claude-code",
-  },
-  capybara: {
-    public: "Mythos tier",
-    internal: "Capybara",
-    type: "model",
-    color: "#b366ff",
-    note: "1M context · fast mode · v8 in leaked source",
-  },
-  fennec: {
-    public: "Opus-class",
-    internal: "Fennec",
-    type: "model",
-    color: "#ffb000",
-    note: "speculated Opus 4.6 in leak analysis",
-  },
-  numbat: {
-    public: "unannounced",
-    internal: "Numbat",
-    type: "model",
-    color: "#33ff88",
-    note: "launch-window comment in leaked source",
-  },
-  karasu: {
-    public: "crow-tengu",
-    internal: "Karasu-Tengu",
-    type: "folklore",
-    color: "#8b5cf6",
-    note: "小天狗 · bird-like mountain spirits",
-  },
-};
+const LINK_FACTS = [
+  { label: "Public name", value: "Claude Code", color: "#f2e8e4" },
+  { label: "Internal codename", value: "Tengu", color: "#e84a5f" },
+  { label: "What it is", value: "AI coding agent (CLI)", color: "#d4a853" },
+  { label: "What it is NOT", value: "A Claude model", color: "#9b7ed9" },
+  { label: "Telemetry prefix", value: "tengu_*", color: "#e84a5f" },
+  { label: "Install", value: "npm i -g @anthropic-ai/claude-code", color: "#b8a8b0" },
+];
 
 const VAULT = [
   {
-    id: "00_briefing",
-    act: "BRIEFING",
-    scene: 0,
-    title: "Start Here",
-    about: "What this vault is and how to read the seven scenes.",
-    path: "/internal/00_briefing",
+    id: "intro",
+    act: "01",
+    title: "Tengu Is Claude Code",
+    about: "The internal name Anthropic engineers use for the Claude Code product — and nothing else.",
     files: [
       {
-        name: "README.txt",
-        title: "Vault guide",
-        about: "The one-minute version before the deep dive",
-        kind: "text",
+        name: "headline",
+        title: "The one sentence",
+        about: "Everything on this page follows from this",
         entries: [
           {
             type: "prose",
-            text: `TENGU_VAULT — INTERNAL CODENAME ARCHIVE
-════════════════════════════════════════
+            text: `TENGU = CLAUDE CODE
+──────────────────
 
-WHAT YOU'RE READING
-  A fan-made scroll explainer. Not official Anthropic.
-  Folklore meets leaked engineering nomenclature.
+Inside Anthropic, the terminal AI coding tool shipped
+as Claude Code is nicknamed Tengu. When you install it,
+run claude in your repo, or see tengu_ in a config file —
+that is all the same product.
 
-THE HEADLINE
-  Tengu = Claude Code. The terminal AI coding tool.
-  NOT a model name. NOT Claude itself. The product.
+Tengu is not:
+  · Claude (the chat model)
+  · Opus, Sonnet, or Haiku
+  · A model tier codename like Capybara or Fennec
 
-THE EVIDENCE
-  Leaked / decompiled Claude Code source (March 2026)
-  references "Tengu" as the internal codename. Every
-  feature flag, telemetry event, and experiment key in
-  the CLI is prefixed tengu_ — hundreds of them.
-
-  ~/.claude.json docs in the leak literally say:
-  "central persistent configuration for Claude Code
-  (internal codename: Tengu)."
-
-THIS VAULT COVERS
-  I   What Claude Code is under the hood name
-  II  Anthropic's animal codename family
-  III Japanese tengu folklore (the actual yōkai)
-  IV  tengu_* flags, gates, and telemetry
-  V   undercover.ts — codename suppression
-  VI  Why a mountain bird-goblin for a coding agent
-  VII ASCII shrine gallery
-
-DISCLAIMER
-  Folklore sections are cultural history. Leak sections
-  summarize publicly reported reverse-engineering work.
-  Anthropic has not officially branded Claude Code as
-  Tengu — this is internal engineering nomenclature.`,
-          },
-        ],
-      },
-      {
-        name: "acts.txt",
-        title: "Scene map",
-        about: "All seven sections on one page",
-        kind: "text",
-        entries: [
-          {
-            type: "prose",
-            text: `RECORDING INDEX
-─────────────────
-  0  BRIEFING      ← you are here
-  I  01_product    Tengu = Claude Code (the tool)
- II  02_codenames  Capybara, Fennec, Numbat…
-III  03_folklore   The yōkai behind the name
- IV  04_internals  tengu_* prefix everywhere
-  V  05_undercover Stripping codenames for OSS
- VI  06_parallel   Why the metaphor works
-VII  07_gallery    ASCII tengu · loop resets
-
-NEXT: ACT I — The Product`,
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: "01_product",
-    act: "ACT I",
-    scene: 1,
-    title: "The Product",
-    about: "Tengu is Claude Code — Anthropic's terminal-based AI coding agent.",
-    path: "/internal/01_product",
-    files: [
-      {
-        name: "what_is_tengu.txt",
-        title: "Definition",
-        about: "Product, not model",
-        kind: "text",
-        entries: [
-          { type: "system", text: "ACT I — identifying the entity" },
-          {
-            type: "prose",
-            text: `TENGU ≠ A MODEL
-────────────────
-
-When engineers at Anthropic say "Tengu," they mean
-Claude Code — the CLI tool you install via npm:
-
-  npm install -g @anthropic-ai/claude-code
-  claude
-
-It is an agent harness: system prompts, tool use,
-permission checks, MCP servers, subagents, hooks,
-memory layers, and the terminal UI that wraps
-whatever Claude model you've selected.
-
-Models have their own codenames (Capybara/Mythos,
-Fennec, Numbat). Tengu is the scaffolding around
-them — the yamabushi guide, not the mountain.`,
+Tengu is:
+  · The agent harness — prompts, tools, permissions, UI
+  · The npm package @anthropic-ai/claude-code
+  · The namespace for every internal flag and event`,
           },
           {
             type: "code",
-            label: "leak_reference.txt",
-            text: `// from leaked config documentation (paraphrased)
-// ~/.claude.json — read on every startup
+            label: "leaked config.ts documentation (paraphrased)",
+            text: `// ~/.claude.json — read on every Claude Code startup
+// from src/utils/config.ts (March 2026 source leak)
 
 "Central persistent configuration file for
- Claude Code (internal codename: Tengu)"
-
-Source types: GlobalConfig, ProjectConfig
-File: src/utils/config.ts`,
+ Claude Code (internal codename: Tengu)"`,
           },
         ],
       },
       {
-        name: "what_claude_code_does.txt",
-        title: "Capabilities",
-        about: "What the Tengu harness actually runs",
-        kind: "text",
+        name: "how-we-know",
+        title: "How we know",
+        about: "Public evidence for the link",
         entries: [
           {
             type: "prose",
-            text: `WHAT CLAUDE CODE (TENGU) DOES
-──────────────────────────────
+            text: `EVIDENCE THE NAMES ARE LINKED
+─────────────────────────────
 
-  · Reads your repo — git state, CLAUDE.md, file tree
-  · Edits files, runs shell commands, greps, globs
-  · Spawns forked subagents with inherited context
-  · 25+ lifecycle hooks you can intercept
-  · MCP tool integrations (browser, APIs, custom)
-  · Permission prompts — "is this command safe?"
-  · Auto-compact when context overflows
-  · Voice mode, IDE bridge, Chrome extension pairing
+March 31, 2026 — Anthropic accidentally shipped a .map
+sourcemap inside a Claude Code npm update. Researchers
+decompiled it within hours.
 
-The leaked source revealed far more behind flags:
-KAIROS proactive mode, anti-distillation decoys,
-DRM attestation in Bun's Zig HTTP layer, Magic Docs
-that self-update on idle, and 44+ hidden experiments.
+What showed up repeatedly:
+  · "Tengu" as the product codename in config docs
+  · Hundreds of keys prefixed tengu_ in feature flags
+  · tengu_* analytics events in telemetry catalogs
+  · undercover.ts — strips "Tengu" from external-repo builds
 
-All of that ships inside the binary/npm package
-nicknamed Tengu internally.`,
+Boris Cherny (Claude Code engineer) confirmed the leak
+was a packaging mistake, not intentional release.
+
+None of this means Anthropic markets the tool as Tengu
+to users. You install Claude Code. Engineers say Tengu.`,
           },
         ],
       },
     ],
   },
   {
-    id: "02_codenames",
-    act: "ACT II",
-    scene: 2,
-    title: "The Menagerie",
-    about: "Anthropic names models after animals and creatures. Tengu is the tool in that zoo.",
-    path: "/internal/02_codenames",
+    id: "claude-code",
+    act: "02",
+    title: "What Claude Code Actually Is",
+    about: "Tengu names the product layer — the agent that runs in your terminal.",
     files: [
       {
-        name: "pattern.txt",
-        title: "Naming pattern",
-        about: "Creatures, not SKUs",
-        kind: "text",
-        entries: [
-          { type: "system", text: "ACT II — internal taxonomy" },
-          {
-            type: "prose",
-            text: `ANTHROPIC'S CREATURE CODENAMES
-──────────────────────────────
-
-Anthropic engineers don't call unreleased models
-"Model vNext" in source. They use animal and
-mythical-creature names — a private vocabulary
-that leaked when a .map sourcemap shipped in a
-Claude Code npm update (March 31, 2026).
-
-CONFIRMED / REPORTED IN LEAKS:
-  Capybara  → Mythos tier (also called Mythos)
-  Fennec    → widely speculated as Opus 4.6
-  Numbat    → upcoming model, launch comment in src
-
-THE TOOL IS DIFFERENT:
-  Tengu     → Claude Code (the agent product)
-
-Tengu sits beside the animal model names but
-isn't one of them. It's the mountain shrine where
-all the creatures are summoned to work.`,
-          },
-          {
-            type: "code",
-            label: "codename_table.tsv",
-            text: `PUBLIC NAME        INTERNAL      KIND
-─────────────────────────────────────────
-Claude Code        Tengu         product/agent
-Mythos tier        Capybara      model family
-(likely Opus 4.6)  Fennec        model
-(unannounced)      Numbat        model`,
-          },
-        ],
-      },
-    ],
-  },
-  {
-    id: "03_folklore",
-    act: "ACT III",
-    scene: 3,
-    title: "The Yōkai",
-    about: "Tengu in Japanese folklore — bird-goblin warriors of the mountain.",
-    path: "/internal/03_folklore",
-    files: [
-      {
-        name: "origins.txt",
-        title: "Origins",
-        about: "Heavenly dog → mountain spirit",
-        kind: "text",
-        entries: [
-          { type: "system", text: "ACT III — folklore transmission" },
-          {
-            type: "prose",
-            text: `WHAT IS A TENGU? (天狗)
-──────────────────────
-
-Japanese: "heavenly dog" (天 dog + 狗 dog)
-Pronounced: TEN-goo
-
-A type of yōkai (supernatural being) and sometimes
-kami (spirit) in Shinto belief. Neither fully god
-nor fully monster — liminal, like good internal tools.
-
-EARLIEST RECORDS (720 CE, Nihon Shoki):
-  A shooting star called "celestial dog" — thunderous,
-  famine follows. Buddhist priests later mapped the
-  term onto mountain spirits.
-
-CHINESE ROOT:
-  Borrowed from tiāngǒu (天狗) — a fierce comet-demon.
-  Japan transformed it into something uniquely its own.`,
-          },
-        ],
-      },
-      {
-        name: "forms_and_ranks.txt",
-        title: "Forms & ranks",
-        about: "Daitengu, kotengu, the long nose",
-        kind: "text",
+        name: "harness",
+        title: "The harness, not the brain",
+        about: "Tengu wraps whichever Claude model you pick",
         entries: [
           {
             type: "prose",
-            text: `TWO KINDS OF TENGU
-──────────────────
-
-DAITENGU (大天狗) — "greater tengu"
-  Humanoid mountain lords. Red face. Impossibly long
-  nose (hanataka-tengu). Wear yamabushi ascetic robes
-  and a small black cap (tokin). Carry a feather fan
-  (hauchiwa) that can summon hurricane winds.
-
-  Famous daitengu: Sōjōbō of Mount Kurama — the tengu
-  who taught the samurai Minamoto no Yoshitsune sword
-  and strategy. A teacher spirit.
-
-KOTENGU (小天狗) — "lesser tengu"
-  Karasu-tengu (烏天狗) — crow tengu. More bird than
-  man. Wings, beak, claws. Mischievous, not regal.
-
-THE LONG NOSE:
-  Appears in art from the 14th century — possibly a
-  humanization of a bird's beak. Linked to Sarutahiko
-  Ōkami, a Shinto monkey/sun deity with a seven-hand-
-  span nose. The nose became the iconic tengu silhouette.`,
-          },
-          {
-            type: "ascii",
-            label: "daitengu_silhouette.ascii",
-            art: `            ╱╲
-           ╱  ╲     ← tokin cap
-          │ ◉  │
-          │  │   │  ← the nose (legendary)
-          │ ╲  ╱ │
-         ╱│════│╲   ← yamabushi robes
-        ╱ │ ╱╲ │ ╲
-       ╱  │╱  ╲│  ╲
-          ╱    ╲
-         ╱ 扇  ╲    ← hauchiwa fan`,
-          },
-        ],
-      },
-      {
-        name: "evolution.txt",
-        title: "From demon to teacher",
-        about: "Buddhist enemy → mountain protector",
-        kind: "text",
-        entries: [
-          {
-            type: "prose",
-            text: `HOW TENGU CHANGED OVER CENTURIES
+            text: `WHAT YOU GET WHEN YOU RUN claude
 ────────────────────────────────
 
-12th–13th c. BUDDHIST VILLAINS
-  Tengu mislead monks, kidnap priests, drop them on
-  mountaintops, possess women, rob temples. Ghosts of
-  arrogant priests who fell into the "tengu realm"
-  (天狗道 tengudō).
+Claude Code (Tengu) is an agentic coding environment:
 
-VANITY WARNING
-  Japanese idiom: tengu ni naru ("become a tengu")
-  = someone swollen with pride. Hubris incarnate.
+  · Loads your repo — git branch, recent commits, CLAUDE.md
+  · Edits files, runs commands, grep/glob search
+  · Asks permission before risky shell operations
+  · Spawns subagents that inherit parent context
+  · Connects MCP tools, IDE extensions, Chrome pairing
+  · Auto-compacts context when the window fills up
+  · Exposes 25+ hooks to intercept each lifecycle stage
 
-17th c. SOFTENING
-  Tengu become protectors of mountains and forests.
-  Associated with Shugendō — ascetic mountain practice.
-  Yamabushi (mountain priests) and tengu share dress.
+The model does the reasoning. Tengu is the mountain
+path — the harness, prompts, tool definitions, memory
+index, terminal UI, and update channel that make a
+model act as a coding agent in your project.`,
+          },
+          {
+            type: "code",
+            label: "user-facing vs internal",
+            text: `YOU SEE                    ENGINEERS SEE
+────────────────────────────────────────────
+claude                     Tengu (codename)
+Claude Code                Tengu
+@anthropic-ai/claude-code  Tengu npm package
+~/.claude.json             Tengu persistent state
+tengu_amber_flint          Tengu feature gate`,
+          },
+        ],
+      },
+      {
+        name: "inside-the-binary",
+        title: "What's inside the Tengu package",
+        about: "Same binary, two names depending on who's talking",
+        entries: [
+          {
+            type: "prose",
+            text: `ALL OF THIS SHIPS AS "CLAUDE CODE"
+──────────────────────────────────
 
-MODERN
-  Tengu masks at festivals. Soccer team mascots.
-  Kurama-Dera temple still sells tengu omamori charms.
-  And now: a codename in a San Francisco terminal tool.`,
+The leaked source showed the Tengu package is far more
+than a chat wrapper. Behind tengu_* flags sit systems
+users rarely see:
+
+  · KAIROS — proactive background agent loop
+  · Anti-distillation decoys in tool schemas
+  · Magic Docs — self-updating files on idle
+  · 3-layer memory (index → topic files → transcripts)
+  · Permission critic — separate model call for safety
+  · DRM-style request attestation in Bun's Zig layer
+
+Every one of those subsystems lives in the codebase
+whose internal product name is Tengu. When a flag like
+tengu_auto_mode_opt_in appears in your config, it is
+gating behavior inside Claude Code — not a model.`,
           },
         ],
       },
     ],
   },
   {
-    id: "04_internals",
-    act: "ACT IV",
-    scene: 4,
-    title: "tengu_* Internals",
-    about: "Every flag, gate, and telemetry event in Claude Code carries the prefix.",
-    path: "/internal/04_internals",
+    id: "tengu-prefix",
+    act: "03",
+    title: "The tengu_ Prefix",
+    about: "How the codename shows up in real Claude Code installs.",
     files: [
       {
-        name: "prefix_explainer.txt",
-        title: "The prefix",
-        about: "Why everything is tengu_something",
-        kind: "text",
+        name: "namespace",
+        title: "One product, one namespace",
+        about: "Why every flag starts with tengu_",
         entries: [
-          { type: "system", text: "ACT IV — parsing ~/.claude.json internals" },
           {
             type: "prose",
-            text: `THE tengu_ PREFIX
-──────────────────
+            text: `tengu_ IS A FINGERPRINT FOR CLAUDE CODE
+────────────────────────────────────────
 
-Inside Claude Code's codebase, the internal product
-name "Tengu" prefixes:
+Anthropic prefixes the internal product name onto:
+  · Statsig / GrowthBook feature gates
+  · Dynamic experiment configs
+  · Analytics and telemetry event names
+  · UI tip variants and onboarding flags
 
-  · Feature gates (Statsig / GrowthBook experiments)
-  · Dynamic config keys
-  · Analytics / telemetry event names
-  · Tip variant IDs
-  · UI experiment flags
+Open ~/.claude.json on a machine with Claude Code and
+you may find cached gates like tengu_hawthorn_window.
+Scroll leak catalogs or Reddit threads from April 2026
+and you'll find hundreds more.
 
-If you open ~/.claude.json on a machine with Claude
-Code installed, you may see cached gate values whose
-keys start with tengu_. Reddit threads and gists from
-the March 2026 leak catalogued hundreds of them.
-
-This is standard eng hygiene: one namespace so event
-dashboards don't collide with other Anthropic products.
-The product codename becomes the telemetry namespace.`,
+If you see tengu_ in a log, config dump, or network
+trace — that traffic came from the Claude Code CLI,
+regardless of what Anthropic calls it publicly.`,
           },
           {
             type: "code",
-            label: "sample_flags.txt",
-            text: `# representative tengu_* keys (from leak catalogs)
-# not exhaustive — hundreds exist
-
-tengu_amber_flint          # feature gate
-tengu_hawthorn_window      # feature gate
-tengu_3p_cookies_default   # browser / Chrome integration
-tengu_session_counter      # analytics event
-tengu_tool_search_mode     # tool routing experiment
-tengu_compact_streaming    # context compaction UI
-tengu_mcp_elicitation      # MCP server prompts
-tengu_auto_mode_opt_in     # proactive agent UX
-tengu_voice_mode_available # voice feature notice
-tengu_buddy_companion      # companion creature system`,
+            label: "sample tengu_* keys (from leak catalogs)",
+            text: `tengu_amber_flint          → feature gate
+tengu_hawthorn_window      → feature gate
+tengu_session_counter      → analytics event
+tengu_tool_search_mode     → tool routing
+tengu_compact_streaming    → context compaction UI
+tengu_mcp_elicitation      → MCP integration
+tengu_auto_mode_opt_in     → proactive agent UX
+tengu_voice_mode_available → voice mode notice
+tengu_buddy_companion      → companion creature UI`,
           },
           {
             type: "prose",
-            text: `WHAT THEY CONTROL (CATEGORIES)
+            text: `WHAT THE FLAGS ACTUALLY TOGGLE
 ──────────────────────────────
 
-  UI experiments — terminal progress bars, todo
-  panels, spinner trees, copy-on-select behavior
+These are not abstract lore — they control real Claude
+Code behavior:
 
-  Model routing — which model handles permission
-  checks, compaction, subagent forks
+  · Terminal UI — progress bars, todo panels, spinners
+  · Model routing — which model runs permission checks
+  · Integrations — IDE auto-connect, Chrome extension
+  · Agent modes — background tasks, streaming compact
+  · Billing surfaces — subscription upsells, usage caps
 
-  Integrations — MCP, Chrome extension, IDE auto-
-  connect, tmux vs iTerm2 split panes
-
-  Billing upsells — subscription notices, Sonnet-1M
-  welcome flows, overage credit grants
-
-  Agent modes — background tasks, KAIROS proactive
-  loop, anti-distillation fake tool injection
-
-Seeing tengu_ in a network log or config dump is a
-fingerprint: this traffic came from Claude Code.`,
+The codename Tengu is not decorative. It is the
+engineering namespace for the entire Claude Code system.`,
           },
         ],
       },
     ],
   },
   {
-    id: "05_undercover",
-    act: "ACT V",
-    scene: 5,
-    title: "Undercover Mode",
-    about: "How Anthropic strips codenames before Claude Code touches external repos.",
-    path: "/internal/05_undercover",
+    id: "undercover",
+    act: "04",
+    title: "Hiding Tengu in Public",
+    about: "Claude Code strips its own codename when working on open source.",
     files: [
       {
-        name: "undercover.ts",
-        title: "One-way door",
-        about: "No Tengu in open source",
-        kind: "text",
+        name: "undercover-ts",
+        title: "undercover.ts",
+        about: "The one-way door between internal and external repos",
         entries: [
-          { type: "system", text: "ACT V — undercover.ts · ~90 lines in leak" },
           {
             type: "prose",
-            text: `UNDERCOVER MODE
-───────────────
+            text: `WHY YOU WON'T SEE "TENGU" IN YOUR COMMITS
+───────────────────────────────────────────
 
-Leaked file: undercover.ts
+Leaked file: undercover.ts (~90 lines)
 
-When Claude Code runs against external / open-source
-repositories, undercover mode activates automatically.
+When Claude Code detects an external or open-source
+repository, undercover mode turns on automatically.
 
-WHAT GETS STRIPPED:
-  · Internal codenames (Tengu, Capybara, Fennec…)
-  · Internal Slack channel references
-  · The name "Claude Code" itself in some contexts
+It removes from prompts and outputs:
+  · Tengu and other internal codenames
+  · Internal Slack channel names
+  · The product name "Claude Code" in some contexts
 
-CRITICAL DESIGN: NO FORCE-OFF
-  Undercover is a one-way door. Once you're in
-  external-repo mode, codenames cannot leak back
-  into commits, comments, or generated text.
+Critical detail: there is no force-off. External mode
+is a one-way door — codenames cannot leak into public
+GitHub even if an engineer forgets.
 
-WHY:
-  Product security. Internal names were never meant
-  for public GitHub. Automatic suppression beats
-  hoping engineers remember to self-censor.
-
-IRONIC RESULT:
-  The tool built to hide "Tengu" is itself named
-  Tengu. The mask has a name written on the inside.`,
+So the tool named Tengu is built to never say Tengu
+outside Anthropic's walls. The mask has a name on the
+inside of the mask.`,
           },
           {
             type: "code",
-            label: "undercover_behavior.txt",
-            text: `external repo detected
-  → strip internal codenames from prompts
-  → agent cannot say "Claude Code" or "Tengu"
-  → cannot reference Anthropic internal channels
+            label: "undercover behavior",
+            text: `external / OSS repo
+  → strip Tengu, Capybara, Fennec from prompts
+  → agent cannot reference internal channels
   → one-way: no toggle back mid-session
 
-internal / Anthropic repos
+internal Anthropic repo
   → full codename vocabulary available`,
           },
         ],
@@ -512,114 +269,98 @@ internal / Anthropic repos
     ],
   },
   {
-    id: "06_parallel",
-    act: "ACT VI",
-    scene: 6,
-    title: "Why Tengu",
-    about: "The folklore ↔ coding-agent parallel Anthropic probably intended.",
-    path: "/internal/06_parallel",
+    id: "why-named",
+    act: "05",
+    title: "Why Call Claude Code Tengu?",
+    about: "Brief folklore context — only as it explains the engineering nickname.",
     files: [
       {
-        name: "mapping.txt",
-        title: "The mapping",
-        about: "Mountain teacher → terminal teacher",
-        kind: "text",
+        name: "folklore-link",
+        title: "The yōkai connection",
+        about: "Mountain teacher spirit → terminal coding guide",
         entries: [
-          { type: "system", text: "ACT VI — pattern matching" },
           {
             type: "prose",
             text: `WHY A TENGU FOR A CODING AGENT?
-────────────────────────────────
+───────────────────────────────
 
-Anthropic hasn't published an official statement on
-the naming choice. But the parallels are almost
-too clean:
+Anthropic has not published an official naming rationale.
+But Tengu (天狗) — Japanese mountain yōkai — maps cleanly
+onto what Claude Code does:
 
 YAMABUSHI GUIDE
-  Tengu appear as mountain ascetics (yamabushi) —
-  priests who mastered dangerous terrain. Claude Code
-  guides devs through unfamiliar codebases, prod
-  incidents, and refactors. Same archetype: the
-  expert who walks beside you on the cliff path.
+  Tengu dress as mountain ascetics who lead people through
+  dangerous terrain. Claude Code guides you through an
+  unfamiliar codebase the same way.
 
-TEACHER OF YOSHITSUNE
-  Sōjōbō trained Japan's greatest warrior on Mount
-  Kurama. The agent teaches through doing — edits,
-  explains, demonstrates patterns in your actual repo.
+TEACHER ON MOUNT KURAMA
+  The daitengu Sōjōbō taught the warrior Yoshitsune by
+  doing, not lecturing. The agent teaches by editing your
+  actual files and running your actual tests.
 
-THE FEATHER FAN (羽団扇)
-  Stirred typhoon winds. The coding agent stirs
-  file trees, test suites, deploy pipelines — small
-  gestures with outsized effects on your system.
+FEATHER FAN
+  Tengu fans stirred typhoon winds. Small agent actions —
+  one file change, one command — can reshape a whole system.
 
-LONG NOSE / FAR SIGHT
-  Tengu see trouble coming. The agent reads linter
-  output, git blame, type errors before you scroll
-  there. Probabilistic foresight, mythologized.
+tengu ni naru ("become a tengu")
+  Japanese idiom for dangerous pride. Possibly self-aware
+  humor from the team that built permission prompts and
+  the "is this command safe?" critic loop.
 
-PRIDE WARNING (tengu ni naru)
-  Folklore tengu are vain. Engineers joke about AI
-  overconfidence. The name might be self-aware humor
-  from the team that built permission prompts and
-  the "critic" safety side-query.
+The codename fits the product archetype: a powerful,
+slightly uncanny guide you invite into your environment —
+not the deity itself, but the spirit that knows the path.`,
+          },
+          {
+            type: "ascii",
+            label: "claude_code_as_tengu.ascii",
+            art: `  $ claude
 
-MYSTERIOUS VIBE
-  Tengu are cool, obscure, slightly threatening,
-  deeply Japanese — fits Anthropic's taste for
-  mythic names over corporate acronyms.`,
+      ╭──────────────────────────╮
+      │ 天狗 · TENGU              │
+      │ public: Claude Code       │
+      │ cwd: your_repo/           │
+      │ flags: tengu_*            │
+      │ model: [your pick]        │
+      ╰──────────────────────────╯`,
           },
         ],
       },
     ],
   },
   {
-    id: "07_gallery",
-    act: "ACT VII",
-    scene: 7,
-    title: "Shrine Gallery",
-    about: "ASCII artifacts · then the vault loops.",
-    path: "/internal/07_gallery",
+    id: "cheatsheet",
+    act: "06",
+    title: "Cheat Sheet",
+    about: "Quick reference for the Tengu ↔ Claude Code link.",
     files: [
       {
-        name: "gallery.log",
-        title: "Render queue",
-        about: "Three sketches · loop",
-        kind: "text",
+        name: "reference",
+        title: "At a glance",
+        about: "Pin this mentally",
         entries: [
-          { type: "system", text: "ACT VII — rendering shrine assets" },
           {
-            type: "ascii",
-            label: "kurama_shrine.ascii",
-            art: `     ╔═══════════════════════════════╗
-     ║  ⛩  MOUNT KURAMA · 鞍馬山      ║
-     ║  where Sōjōbō taught Yoshitsune ║
-     ║  now: where Tengu teaches git    ║
-     ╚═══════════════════════════════╝`,
-          },
-          {
-            type: "ascii",
-            label: "claude_code_invocation.ascii",
-            art: `  $ npm i -g @anthropic-ai/claude-code
-  $ claude
+            type: "prose",
+            text: `TENGU ↔ CLAUDE CODE CHEAT SHEET
+────────────────────────────────
 
-      ╭──────────────────────╮
-      │ 天狗 · TENGU ONLINE   │
-      │ cwd: your_repo/       │
-      │ model: [selected]     │
-      │ flags: tengu_* × N    │
-      ╰──────────────────────╯`,
+  Tengu            = Claude Code (internal only)
+  Claude           = the AI models (separate codenames)
+  tengu_*          = any Claude Code flag or event
+  ~/.claude.json   = Tengu persistent state file
+  claude CLI       = the user-facing Tengu binary
+  undercover.ts    = hides "Tengu" on public repos
+
+WHEN SOMEONE SAYS TENGU, ASK:
+  "Do you mean Claude Code the tool?"
+  If yes — you're aligned. If they mean a model, they're
+  mixing up the harness with the brain.
+
+DISCLAIMER
+  Fan-made explainer. Not affiliated with Anthropic.
+  Based on folklore research and publicly reported
+  analysis of the March 2026 Claude Code source leak.`,
           },
-          {
-            type: "ascii",
-            label: "tengu_ni_naru.ascii",
-            art: `   ┌─────────────────────────┐
-   │  WARNING: tengu ni naru   │
-   │  天狗になる · pride event   │
-   │  confidence > evidence    │
-   │  >> run tests <<          │
-   └─────────────────────────┘`,
-          },
-          { type: "system", text: "REWIND → ACT I / The Product" },
         ],
       },
     ],
@@ -691,10 +432,7 @@ function formatProse(text) {
 }
 
 function renderEntry(entry) {
-  if (entry.type === "system") {
-    if (entry.text.startsWith("REWIND")) return "";
-    return `<div class="callout">${esc(entry.text)}</div>`;
-  }
+  if (entry.type === "system") return "";
   if (entry.type === "prose") return formatProse(entry.text);
   if (entry.type === "code") {
     return `<div class="code-panel">
@@ -705,27 +443,14 @@ function renderEntry(entry) {
   if (entry.type === "ascii") {
     return `<figure class="figure">
       <pre>${esc(entry.art)}</pre>
-      <figcaption>${esc(entry.label || "shrine.ascii")}</figcaption>
+      <figcaption>${esc(entry.label || "diagram.ascii")}</figcaption>
     </figure>`;
   }
   return "";
 }
 
 function renderArticle(file, folder) {
-  const asciiEntries = file.entries.filter((e) => e.type === "ascii");
-  const otherEntries = file.entries.filter((e) => e.type !== "ascii");
-  const isGallery = folder.id === "07_gallery" && asciiEntries.length > 1;
-
-  let body = otherEntries.map((e) => renderEntry(e)).join("");
-
-  if (asciiEntries.length) {
-    if (isGallery) {
-      body += `<div class="gallery-grid">${asciiEntries.map((e) => renderEntry(e)).join("")}</div>`;
-    } else {
-      body += asciiEntries.map((e) => renderEntry(e)).join("");
-    }
-  }
-
+  const body = file.entries.map((e) => renderEntry(e)).join("");
   return `<article class="article" id="${folder.id}-${file.name.replace(/\./g, "-")}">
     <h3 class="article-title">${esc(file.title)}</h3>
     <p class="article-about">${esc(file.about)}</p>
@@ -747,21 +472,17 @@ function renderSection(folder) {
 function renderToc() {
   const toc = document.getElementById("toc");
   toc.innerHTML = `<h2>Sections</h2>${VAULT.map(
-    (f) =>
-      `<a href="#${f.id}"><span class="toc-act">${esc(f.act || "")}</span>${esc(f.title)}</a>`
+    (f) => `<a href="#${f.id}">${esc(f.title)}</a>`
   ).join("")}`;
 }
 
-function renderCodenames() {
-  document.getElementById("codename-cards").innerHTML = Object.values(CODENAMES)
-    .map(
-      (e) => `<div class="codename-card">
-        <div class="name" style="color:${e.color}">${esc(e.internal)}</div>
-        <div class="public">${esc(e.public)}</div>
-        <div class="note">${esc(e.type)} · ${esc(e.note)}</div>
-      </div>`
-    )
-    .join("");
+function renderLinkFacts() {
+  document.getElementById("link-facts").innerHTML = LINK_FACTS.map(
+    (f) => `<div class="link-fact">
+      <span class="link-label">${esc(f.label)}</span>
+      <span class="link-value" style="color:${f.color}">${esc(f.value)}</span>
+    </div>`
+  ).join("");
 }
 
 function initTocObserver() {
@@ -786,5 +507,5 @@ function initTocObserver() {
 
 document.getElementById("content").innerHTML = VAULT.map(renderSection).join("");
 renderToc();
-renderCodenames();
+renderLinkFacts();
 initTocObserver();
